@@ -1,0 +1,149 @@
+
+:root {
+  --background: #17221d;
+  --panel: #24342b;
+  --panel-light: #304638;
+  --green: #8fbd78;
+  --text: #f1f3e9;
+  --muted: #b4c4ae;
+  --border: #526c55;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+}
+
+.topbar {
+  padding: 24px;
+  background: #263b2d;
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+h1 {
+  margin: 0 0 8px;
+  color: var(--green);
+}
+
+h2 {
+  margin-top: 0;
+  color: var(--green);
+}
+
+p {
+  color: var(--muted);
+}
+
+.progress {
+  min-width: 190px;
+}
+
+.progress-track {
+  height: 9px;
+  margin-top: 8px;
+  background: #111a15;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+#progressBar {
+  height: 100%;
+  width: 0%;
+  background: var(--green);
+  transition: width .2s;
+}
+
+nav {
+  display: flex;
+  gap: 8px;
+  padding: 14px 24px;
+  overflow-x: auto;
+  background: #1d2c23;
+}
+
+button {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 16px;
+  background: var(--panel-light);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button:hover,
+button.active {
+  background: var(--green);
+  color: #17221d;
+}
+
+main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  gap: 18px;
+  padding: 20px;
+}
+
+.map-panel,
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+}
+
+#map {
+  min-height: 520px;
+  border-radius: 10px;
+  background: #344c38;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 24px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+#saveStatus {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media (max-width: 800px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  #map {
+    min-height: 350px;
+  }
+}
