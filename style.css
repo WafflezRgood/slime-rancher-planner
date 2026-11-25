@@ -400,3 +400,10 @@ label {
     cursor: pointer;
     transition: background 0.15s ease, border-color 0.15s ease;
 }
+#gadgetSiteList button {
+    min-height: 65px !important;
+    height: 82px !important;
+    padding: 7px 5px !important;
+    box-sizing: border-box;
+    overflow: hidden;
+}
