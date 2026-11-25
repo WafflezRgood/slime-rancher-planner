@@ -363,6 +363,11 @@ label {
 #gadgetPlannerPanel {
     position: relative;
     z-index: 1001;
+    max-height: 80vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    box-sizing: border-box;
 }
 
 #gadgetMarkers {
