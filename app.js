@@ -388,12 +388,46 @@ function checkFileReaderSupport() {
 /**
  * Import data from stringified data provided by user in textarea
  */
+
 function importDataFromText() {
-	var dataToImport = $('#importDataTextArea').val(); //possibly may be changed to html5 client side file handling https://www.html5rocks.com/en/tutorials/file/dndfiles/
-	plots = JSON.parse(dataToImport);
-	reloadSite();
-	$('#importData').modal('hide');
+    try {
+        var dataToImport = $('#importDataTextArea').val();
+        var data = JSON.parse(dataToImport);
+
+        if (Array.isArray(data)) {
+            // Older plot-only save
+            plots = data;
+        } else if (data && Array.isArray(data.plots)) {
+            // New combined save
+            plots = data.plots;
+
+            if (data.gadgetAssignments !== undefined) {
+                localStorage.setItem(
+                    'slimeRancherGadgetPlanner',
+                    JSON.stringify(data.gadgetAssignments)
+                );
+            }
+
+            if (data.generalTasks !== undefined) {
+                localStorage.setItem(
+                    'slimeRancherGeneralTasks',
+                    JSON.stringify(data.generalTasks)
+                );
+            }
+        } else {
+            throw new Error('Invalid save file');
+        }
+
+        savePlotsToStorage();
+        $('#importData').modal('hide');
+        reloadSite();
+
+    } catch (error) {
+        $('#fileError').show();
+        console.error('Import failed:', error);
+    }
 }
+
 
 /**
  * Import data by uploading exported file
