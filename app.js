@@ -386,10 +386,20 @@ function importDataFromFile() {
  * Reset data to factory value
  */
 function resetData(e) {
-	e.preventDefault();
-	plots = $.extend(true, [], defaultValuesPlots); //plots = defaultValuesPlots doesn't make a copy, it points to the same array
-	reloadSite();
-	$('#confirmReset').modal('hide');
+    e.preventDefault();
+
+    // Reset original ranch planner
+    plots = $.extend(true, [], defaultValuesPlots);
+    reloadSite();
+
+    // Reset gadget planner and general checklist
+    localStorage.removeItem('slimeRancherGadgetPlanner');
+    localStorage.removeItem('slimeRancherGeneralTasks');
+
+    $('#confirmReset').modal('hide');
+
+    // Reload so all gadget markers and checklists reset visually
+    location.reload();
 }
 
 /**
