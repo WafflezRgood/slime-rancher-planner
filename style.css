@@ -1,149 +1,362 @@
-
-:root {
-  --background: #17221d;
-  --panel: #24342b;
-  --panel-light: #304638;
-  --green: #8fbd78;
-  --text: #f1f3e9;
-  --muted: #b4c4ae;
-  --border: #526c55;
-}
-
-* {
-  box-sizing: border-box;
-}
+/* Basic css */
 
 body {
-  margin: 0;
-  background: var(--background);
-  color: var(--text);
-  font-family: Arial, sans-serif;
+	width: 1680px;
+	height: 920px;
+	margin: 0;
+	background: url("img/map.png") no-repeat center;
 }
 
-.topbar {
-  padding: 24px;
-  background: #263b2d;
-  border-bottom: 2px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
+a {
+	color: inherit;
 }
 
-h1 {
-  margin: 0 0 8px;
-  color: var(--green);
+label {
+	margin-top: .5rem;
 }
 
-h2 {
-  margin-top: 0;
-  color: var(--green);
+.hideForReal {
+	display: none !important;
 }
 
-p {
-  color: var(--muted);
+/* Donate button */
+
+#donateBox {
+	display: none;
+	position: fixed;
+	left: 0;
+	top: 0;
+	padding: 5px;
+	background-color: rgba(65, 82, 95, 0.7);
+	border: rgba(65, 82, 95, 0.7) solid 1px;
+	border-radius: 3px;
+	z-index: 1;
+	line-height: 1.0;
 }
 
-.progress {
-  min-width: 190px;
+#donateText {
+	font-size: 14px;
+	margin: 5px 0 2px 0;
+	color: white;
+	display: none;
+	text-shadow: 0 0 5px rgb(34, 140, 126);
+	line-height: 1.25;
 }
 
-.progress-track {
-  height: 9px;
-  margin-top: 8px;
-  background: #111a15;
-  border-radius: 20px;
-  overflow: hidden;
+#donateText p {
+	margin: 0;
 }
 
-#progressBar {
-  height: 100%;
-  width: 0%;
-  background: var(--green);
-  transition: width .2s;
+/* Export menu */
+
+#exportMenu {
+	position: fixed;
+	right: 0;
+	top: 0;
+	padding: 5px;
+	background-color: rgba(65, 82, 95, 0.7);
+	border: rgba(65, 82, 95, 0.7) solid 1px;
+	border-radius: 3px;
+	z-index: 1;
 }
 
-nav {
-  display: flex;
-  gap: 8px;
-  padding: 14px 24px;
-  overflow-x: auto;
-  background: #1d2c23;
+#exportMenu img {
+	width: 40px;
 }
 
-button {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 16px;
-  background: var(--panel-light);
-  color: var(--text);
-  cursor: pointer;
-  font-size: 14px;
+#menuText {
+	font-size: 14px;
+	margin: 5px 0 2px 0;
+	color: white;
+	display: none;
+	text-shadow: 0 0 5px rgb(34, 140, 126);
+	line-height: 1.25;
+	text-align: center;
 }
 
-button:hover,
-button.active {
-  background: var(--green);
-  color: #17221d;
+#issueLink, #numberOfItemsLink {
+	margin: 0 5px 0 0;
 }
 
-main {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 310px;
-  gap: 18px;
-  padding: 20px;
+#downloadData .modal-body {
+	text-align: center;
 }
 
-.map-panel,
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 18px;
+#importData p {
+	margin: 0;
 }
 
-#map {
-  min-height: 520px;
-  border-radius: 10px;
-  background: #344c38;
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
+#importData textarea {
+	width: 100%;
+	height: 150px;
+	font-size: 12px;
 }
 
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+#fileError {
+	color: red;
+	display: none;
 }
 
-footer {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 18px 24px;
-  border-top: 1px solid var(--border);
-  flex-wrap: wrap;
+#fileLoadingAnimation {
+	display: none;
+	width: 40px;
+	height: 40px;
+	float: left;
+	margin: -6px 10px 0 0;
 }
 
-#saveStatus {
-  color: var(--muted);
-  font-size: 13px;
+/* Setup plot */
+
+#description, #numberOfItems {
+	width: 100%;
+	padding: 5px 15px;
 }
 
-@media (max-width: 800px) {
-  main {
-    grid-template-columns: 1fr;
-  }
+/* Small plots */
 
-  .topbar {
-    align-items: flex-start;
-    flex-direction: column;
-  }
+.plot {
+	position: absolute;
+	margin: 0;
+	background: rgba(255, 255, 255, 0.3);
+	width: 25px;
+	height: 25px;
+	border: rgba(0, 0, 0, 0.5) solid 1px;
+	border-radius: 3px;
+	box-sizing: content-box; /* overriding bootstrap default */
+}
 
-  #map {
-    min-height: 350px;
-  }
+#plotTemplate {
+	display: none;
+}
+
+.plotNumber {
+	text-align: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: bold;
+}
+
+/*noinspection CssUnusedSymbol*/
+#plot-W {
+	opacity: 0;
+	border: yellow solid 1px;
+}
+
+/*noinspection CssUnusedSymbol*/
+#plot-W:hover {
+	opacity: 1;
+}
+
+/* Big plots */
+
+.plotMaximized {
+	position: absolute;
+	margin: 0;
+	background: rgba(255, 255, 255, 0.7);
+	width: 75px;
+	height: 75px;
+	border: rgba(0, 0, 0, 1) solid 1px;
+	border-radius: 3px;
+	box-sizing: content-box;
+}
+
+#plotMaximizedTemplate {
+	display: none;
+}
+
+/*noinspection CssUnusedSymbol*/
+.corral {
+	background-color: rgba(255, 192, 203, 0.7);
+}
+
+/*noinspection CssUnusedSymbol*/
+.garden {
+	background-color: rgba(173, 255, 47, 0.7);
+}
+
+/*noinspection CssUnusedSymbol*/
+.freerange {
+	background-color: rgba(240, 230, 140, 0.7);
+}
+
+/*noinspection CssUnusedSymbol*/
+.coop {
+	background-color: rgba(128, 128, 128, 0.7);
+}
+
+/*noinspection CssUnusedSymbol*/
+.pond {
+	background-color: rgba(0, 255, 255, 0.7);
+}
+
+/*noinspection CssUnusedSymbol*/
+.silo {
+	background-color: rgba(205, 133, 63, 0.7);
+}
+
+/*noinspection CssUnusedSymbol*/
+.incinerator {
+	background-color: rgba(220, 20, 60, 0.7);
+}
+
+/*noinspection CssUnusedSymbol*/
+.plotFreerange {
+	background-color: rgba(240, 230, 140, 0.7);
+}
+
+.plotType {
+	display: none;
+	text-transform: capitalize;
+	text-align: center;
+	font-size: 12px;
+	font-weight: bold;
+	color: black;
+	text-shadow: 0 0 10px white;
+	margin: 0;
+}
+
+.corralContent {
+	display: none;
+	align-items: center;
+	justify-content: center;
+	height: 57px;
+}
+
+.corralContent img {
+	width: 30px;
+}
+
+.corralContent p {
+	margin: 0;
+}
+
+.corralContent div {
+	float: left;
+}
+
+.plotContent {
+	display: none;
+	align-items: center;
+	justify-content: center;
+	height: 57px;
+}
+
+.plotContent div {
+	margin: 0;
+}
+
+.plotContent img {
+	width: 50px;
+}
+
+.numberOfItemsInPlot {
+	position: absolute;
+	font-weight: bold;
+	display: none;
+	font-size: 32px;
+	font-style: italic;
+	opacity: 0.3;
+	padding: 0 5px 2px 2px;
+	border-radius: 5px;
+	color: white;
+	text-shadow: -1px 0 1px black, 0 1px 1px black, 1px 0 1px black, 0 -1px 1px black;
+}
+
+/* Regions */
+
+.region {
+	position: absolute;
+	margin: 0;
+	background-color: rgba(255, 255, 255, 0.7);
+	background-position: bottom left;
+	background-repeat: no-repeat;
+	width: 75px;
+	height: 75px;
+	border: rgba(0, 0, 0, 1) solid 1px;
+	border-radius: 3px;
+	box-sizing: content-box;
+}
+
+#regionTemplate {
+	display: none;
+}
+
+.regionName {
+	display: none;
+	text-transform: capitalize;
+	text-align: center;
+	font-size: 15px;
+	font-weight: bold;
+	color: black;
+	text-shadow: 0 0 10px white;
+	margin: 0;
+	font-style: italic;
+}
+
+/* Slime Count */
+
+#openSlimeCount {
+	position: fixed;
+	right: 0;
+	top: 150px;
+	border: rgba(0, 0, 0, 1) solid 1px;
+	border-top-left-radius: 3px;
+	border-bottom-left-radius: 3px;
+	padding: 3px 5px;
+	line-height: 1;
+	background-color: rgba(65, 82, 95, 0.7);
+}
+
+#slimeCount {
+	position: fixed;
+	right: 0;
+	top: 150px;
+	border: rgba(0, 0, 0, 1) solid 1px;
+	border-top-left-radius: 3px;
+	border-bottom-left-radius: 3px;
+	line-height: 1;
+	background-color: rgb(65, 82, 95);
+	color: white;
+	padding: 10px;
+	display: none;
+}
+
+#hideSlimeCount {
+	float: right;
+	margin-left: 5px;
+}
+
+#refreshSlimeCount {
+	float: right;
+	width: 20px;
+}
+
+#slimeCountTitle {
+	text-transform: capitalize;
+	text-align: center;
+	font-size: 18px;
+	font-weight: bold;
+	text-shadow: 0 0 10px black;
+	margin: 0;
+	font-style: italic;
+	margin-bottom: 15px;
+}
+
+#slimeCount table {
+	text-align: center;
+}
+
+#slimeCount table th {
+	font-size: 12px;
+	width: 80px;
+	text-align: center;
+}
+
+#slimeCountTableRowTemplate {
+	display: none;
+}
+
+.slimeCountImage {
+	height: 30px;
 }
