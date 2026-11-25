@@ -223,6 +223,7 @@ var meatTypes = [
 
 $(document).ready(function () {
 	plots = $.extend(true, [], defaultValuesPlots);
+	loadPlotsFromStorage();
 
 	calculateBodySize();
 	showPlots();
