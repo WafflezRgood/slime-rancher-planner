@@ -1004,3 +1004,340 @@ function moveToTop() {
 	$('.plotMaximized').css('z-index', 0);
 	$(this).find('.plotMaximized').css('z-index', 1);
 }
+
+/* ==========================================
+   GADGET PLANNER ADD-ON
+   Kept separate from the original plot editor
+========================================== */
+(function () {
+    "use strict";
+
+    $(document).ready(function () {
+        var areas = {
+            main: { name: "Main Ranch", count: 27 },
+            grotto: { name: "Grotto", count: 11 },
+            overgrowth: { name: "Overgrowth", count: 12 },
+            docks: { name: "Docks", count: 11 },
+            lab: { name: "Lab", count: 15 }
+        };
+
+        var storageKey = "slimeRancherGadgetPlanner";
+        var selectedArea = "main";
+        var selectedSite = null;
+        var assignments = {};
+        var generalTasks = [
+            "Unlock all five ranch areas",
+            "Unlock all 26 ranch plots",
+            "Collect all ranchable slime types",
+            "Collect all standard food types",
+            "Collect all special food types",
+            "Discover all 13 Gordo Snare slime types",
+            "Build and deploy a drone",
+            "Complete the main game",
+            "Complete the 7Zee Rewards Club",
+            "Explore all ranch expansion areas"
+        ];
+
+        try {
+            assignments = JSON.parse(localStorage.getItem(storageKey)) || {};
+        } catch (error) {
+            assignments = {};
+        }
+
+        var generalKey = "slimeRancherGeneralTasks";
+        var completedTasks = {};
+
+        try {
+            completedTasks = JSON.parse(localStorage.getItem(generalKey)) || {};
+        } catch (error) {
+            completedTasks = {};
+        }
+
+        /* Add planner styling without changing style.css */
+        if (!document.getElementById("gadgetPlannerStyles")) {
+            $("<style>", {
+                id: "gadgetPlannerStyles",
+                text: `
+                    #gadgetPlannerPanel {
+                        padding: 15px;
+                        background: rgba(25, 35, 40, .96);
+                        color: #fff;
+                        border-radius: 10px;
+                        margin: 15px;
+                        max-width: 850px;
+                    }
+                    #gadgetPlannerPanel button,
+                    #gadgetPlannerPanel select,
+                    #gadgetPlannerPanel textarea {
+                        margin: 4px;
+                        padding: 7px;
+                        border-radius: 5px;
+                    }
+                    #gadgetSiteList {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+                        gap: 7px;
+                        margin: 12px 0;
+                    }
+                    .gadgetSiteButton {
+                        background: #344b50;
+                        color: white;
+                        border: 1px solid #789;
+                        cursor: pointer;
+                        min-height: 48px;
+                    }
+                    .gadgetSiteButton.selected {
+                        outline: 2px solid #f4cf68;
+                    }
+                    .gadgetSiteButton.assigned {
+                        background: #34775b;
+                    }
+                    #gadgetPlannerPanel label {
+                        display: block;
+                        margin-top: 10px;
+                    }
+                    #gadgetPlannerPanel textarea {
+                        width: 95%;
+                        min-height: 55px;
+                    }
+                    #gadgetProgress {
+                        background: #26383c;
+                        padding: 10px;
+                        border-radius: 7px;
+                        margin: 12px 0;
+                    }
+                    #gadgetProgressBar {
+                        height: 12px;
+                        background: #53666a;
+                        border-radius: 10px;
+                        overflow: hidden;
+                        margin-top: 7px;
+                    }
+                    #gadgetProgressFill {
+                        height: 100%;
+                        width: 0;
+                        background: #65c58b;
+                    }
+                    #generalCompletion {
+                        margin-top: 20px;
+                        padding-top: 12px;
+                        border-top: 1px solid #789;
+                    }
+                    #generalCompletion label {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+                    #generalCompletion input {
+                        width: auto;
+                    }
+                `
+            }).appendTo("head");
+        }
+
+        var panel = $("#gadgetPlannerPanel");
+        if (!panel.length) return;
+
+        /* Create the extra checklist and progress display */
+        if (!$("#gadgetProgress").length) {
+            $("#gadgetStatus").after(`
+                <div id="gadgetProgress">
+                    <strong>Gadget placement progress</strong>
+                    <div id="gadgetProgressText">0 / 76 sites assigned</div>
+                    <div id="gadgetProgressBar">
+                        <div id="gadgetProgressFill"></div>
+                    </div>
+                </div>
+                <section id="generalCompletion">
+                    <h3>General completion checklist</h3>
+                    <p>Tick these off as you complete them in-game.</p>
+                    <div id="generalTaskList"></div>
+                </section>
+            `);
+        }
+
+        function siteKey(area, number) {
+            return area + "-" + number;
+        }
+
+        function saveAssignments() {
+            localStorage.setItem(storageKey, JSON.stringify(assignments));
+        }
+
+        function saveTasks() {
+            localStorage.setItem(generalKey, JSON.stringify(completedTasks));
+        }
+
+        function renderSites() {
+            var list = $("#gadgetSiteList");
+            list.empty();
+
+            var count = areas[selectedArea].count;
+
+            for (var i = 1; i <= count; i++) {
+                var key = siteKey(selectedArea, i);
+                var assignment = assignments[key];
+                var button = $("<button>", {
+                    type: "button",
+                    class: "gadgetSiteButton",
+                    "data-site": i
+                });
+
+                button.append($("<strong>").text("Site " + i));
+
+                if (assignment && assignment.gadget) {
+                    button.addClass("assigned");
+                    button.append(
+                        $("<div>").text(assignment.gadget)
+                    );
+                } else {
+                    button.append($("<div>").text("Empty"));
+                }
+
+                if (selectedSite === i) {
+                    button.addClass("selected");
+                }
+
+                list.append(button);
+            }
+
+            updateProgress();
+        }
+
+        function renderTasks() {
+            var list = $("#generalTaskList");
+            list.empty();
+
+            generalTasks.forEach(function (task, index) {
+                var checkbox = $("<input>", {
+                    type: "checkbox",
+                    checked: !!completedTasks[index],
+                    "data-task": index
+                });
+
+                var label = $("<label>").append(checkbox).append(
+                    $("<span>").text(task)
+                );
+
+                list.append(label);
+            });
+        }
+
+        function updateProgress() {
+            var total = 0;
+            var assigned = 0;
+
+            Object.keys(areas).forEach(function (area) {
+                total += areas[area].count;
+
+                for (var i = 1; i <= areas[area].count; i++) {
+                    var entry = assignments[siteKey(area, i)];
+                    if (entry && entry.gadget) assigned++;
+                }
+            });
+
+            var percentage = total ? (assigned / total) * 100 : 0;
+
+            $("#gadgetProgressText").text(
+                assigned + " / " + total + " sites assigned (" +
+                Math.round(percentage) + "%)"
+            );
+
+            $("#gadgetProgressFill").css("width", percentage + "%");
+        }
+
+        function clearEditor() {
+            selectedSite = null;
+            $("#gadgetSelectedTitle").text("Select a gadget site");
+            $("#gadgetChoice").val("");
+            $("#gadgetNotes").val("");
+            $("#gadgetStatus").text("");
+            renderSites();
+        }
+
+        function openSite(number) {
+            selectedSite = number;
+
+            var key = siteKey(selectedArea, number);
+            var assignment = assignments[key] || {};
+
+            $("#gadgetSelectedTitle").text(
+                areas[selectedArea].name + " — Site " + number
+            );
+
+            $("#gadgetChoice").val(assignment.gadget || "");
+            $("#gadgetNotes").val(assignment.notes || "");
+            $("#gadgetStatus").text(
+                assignment.gadget ? "Currently assigned: " + assignment.gadget : "This site is empty."
+            );
+
+            renderSites();
+        }
+
+        $("#gadgetZone").on("change", function () {
+            selectedArea = $(this).val();
+
+            if (!areas[selectedArea]) selectedArea = "main";
+
+            clearEditor();
+        });
+
+        $("#gadgetSiteList").on("click", ".gadgetSiteButton", function () {
+            openSite(parseInt($(this).attr("data-site"), 10));
+        });
+
+        $("#saveGadget").on("click", function () {
+            if (selectedSite === null) {
+                $("#gadgetStatus").text("Select a site first.");
+                return;
+            }
+
+            var gadget = $("#gadgetChoice").val();
+            var notes = $("#gadgetNotes").val();
+
+            var key = siteKey(selectedArea, selectedSite);
+
+            if (!gadget) {
+                delete assignments[key];
+            } else {
+                assignments[key] = {
+                    gadget: $("#gadgetChoice option:selected").text(),
+                    value: gadget,
+                    notes: notes
+                };
+            }
+
+            saveAssignments();
+            $("#gadgetStatus").text("Site saved.");
+            renderSites();
+        });
+
+        $("#clearGadget").on("click", function () {
+            if (selectedSite === null) {
+                $("#gadgetStatus").text("Select a site first.");
+                return;
+            }
+
+            delete assignments[siteKey(selectedArea, selectedSite)];
+            saveAssignments();
+            clearEditor();
+            $("#gadgetStatus").text("Site cleared.");
+        });
+
+        $("#generalTaskList").on("change", "input", function () {
+            var index = $(this).attr("data-task");
+            completedTasks[index] = $(this).is(":checked");
+            saveTasks();
+        });
+
+        /* Initial display */
+        renderSites();
+        renderTasks();
+        updateProgress();
+
+        $("#toggleGadgetPlanner").on("click", function () {
+            $("#gadgetPlannerPanel").toggle();
+        });
+    });
+})();
+
