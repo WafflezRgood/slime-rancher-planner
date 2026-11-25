@@ -1361,58 +1361,85 @@ function moveToTop() {
         }
 
         function renderGadgetMarkers() {
-            var container = $("#gadgetMarkers");
-            container.empty();
+    var container = $("#gadgetMarkers");
+    container.empty();
 
-            Object.keys(assignments).forEach(function (key) {
-                var item = assignments[key];
+    var slimeIcons = {
+        pink: "pink-slime",
+        rock: "rock-slime",
+        tabby: "tabby-slime",
+        phosphor: "phosphor-slime",
+        rad: "rad-slime",
+        boom: "boom-slime",
+        honey: "honey-slime",
+        hunter: "hunter-slime",
+        crystal: "crystal-slime",
+        quantum: "quantum-slime",
+        dervish: "dervish-slime",
+        tangle: "tangle-slime",
+        mosaic: "mosaic-slime"
+    };
 
-                if (!item || !item.gadget ||
-                    typeof item.x !== "number" ||
-                    typeof item.y !== "number") {
-                    return;
-                }
+    Object.keys(assignments).forEach(function (key) {
+        var item = assignments[key];
 
-                var label = item.gadget;
-
-                if (item.value && item.value.indexOf("gordo") !== -1) {
-                    label = "Gordo: " + item.gadget.replace("Gordo Snare - ", "");
-                }
-
-                var marker = $("<button>", {
-                    type: "button",
-                    class: "gadgetMapMarker",
-                    text: label,
-                    title: key
-                });
-
-                marker.css({
-                    left: (leftOffset + item.x) + "px",
-                    top: (topOffset + item.y) + "px"
-                });
-
-                marker.attr("data-key", key);
-                container.append(marker);
-            });
+        if (!item || !item.gadget ||
+            typeof item.x !== "number" ||
+            typeof item.y !== "number") {
+            return;
         }
 
-        $("#gadgetMarkers").on("click", ".gadgetMapMarker", function (event) {
-            event.preventDefault();
-            event.stopPropagation();
+        var searchText = (
+            (item.gadget || "") + " " + (item.value || "")
+        ).toLowerCase();
 
-            var key = $(this).attr("data-key");
-            var parts = key.split("-");
-            var area = parts.shift();
-            var number = parseInt(parts.join("-"), 10);
+        var iconName = null;
 
-            if (!areas[area] || !number) return;
-
-            selectedArea = area;
-            $("#gadgetZone").val(area);
-            renderSites();
-            openSite(number);
-            $("#gadgetStatus").text("Selected map marker. You can edit its assignment.");
+        Object.keys(slimeIcons).forEach(function (slime) {
+            if (searchText.indexOf(slime) !== -1) {
+                iconName = slimeIcons[slime];
+            }
         });
+
+        if (!iconName) return;
+
+        var marker = $("<button>", {
+            type: "button",
+            class: "gadgetMapMarker",
+            title: item.gadget + " — " + key,
+            "data-key": key
+        });
+
+        var icon = $("<img>", {
+            src: "img/plotItems/" + iconName + ".png",
+            alt: item.gadget
+        });
+
+        icon.css({
+            width: "34px",
+            height: "34px",
+            objectFit: "contain",
+            display: "block"
+        });
+
+        marker.empty().append(icon);
+
+        marker.css({
+            left: (leftOffset + item.x) + "px",
+            top: (topOffset + item.y) + "px",
+            width: "42px",
+            height: "42px",
+            padding: "2px",
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+        });
+
+        container.append(marker);
+    });
+}
+
 
         /* ---------- EDITOR ---------- */
 
