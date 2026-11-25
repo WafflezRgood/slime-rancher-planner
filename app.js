@@ -121,6 +121,29 @@ var defaultValuesPlots = [
 ];
 
 var plots;
+// Plot autosave
+function savePlotsToStorage() {
+    localStorage.setItem(
+        'slimeRancherPlots',
+        JSON.stringify(plots)
+    );
+}
+
+function loadPlotsFromStorage() {
+    var savedPlots = localStorage.getItem('slimeRancherPlots');
+
+    if (savedPlots) {
+        try {
+            var parsedPlots = JSON.parse(savedPlots);
+
+            if (Array.isArray(parsedPlots)) {
+                plots = parsedPlots;
+            }
+        } catch (error) {
+            console.error('Could not load saved plots:', error);
+        }
+    }
+}
 
 var regions = [
 	{
