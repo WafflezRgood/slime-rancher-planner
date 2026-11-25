@@ -1,1 +1,69 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slime Rancher Ultimate Planner</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Slime Rancher Planner</h1>
+      <p>Plan your ranch. Collect everything. Complete the Far, Far Range.</p>
+    </div>
+    <div class="progress">
+      <span id="progressText">0% complete</span>
+      <div class="progress-track">
+        <div id="progressBar"></div>
+      </div>
+    </div>
+  </header>
+
+  <nav id="zoneTabs">
+    <button class="active" data-zone="main">Main Ranch</button>
+    <button data-zone="grotto">Grotto</button>
+    <button data-zone="overgrowth">Overgrowth</button>
+    <button data-zone="lab">Lab</button>
+    <button data-zone="docks">Docks</button>
+  </nav>
+
+  <main>
+    <section class="map-panel">
+      <h2 id="zoneTitle">Main Ranch</h2>
+      <div id="map">
+        <p>Ranch map loading...</p>
+      </div>
+    </section>
+
+    <aside class="sidebar">
+      <section class="panel">
+        <h2>Selected location</h2>
+        <div id="selection">
+          <p>Select a ranch plot or gadget location on the map.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Placement progress</h2>
+        <div id="placementChecklist"></div>
+      </section>
+
+      <section class="panel">
+        <h2>General completion</h2>
+        <div id="generalChecklist"></div>
+      </section>
+    </aside>
+  </main>
+
+  <footer>
+    <button id="saveButton">Save layout</button>
+    <button id="resetButton">Reset layout</button>
+    <span id="saveStatus">Your layout is stored in this browser.</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
