@@ -1009,6 +1009,10 @@ function moveToTop() {
    GADGET PLANNER ADD-ON
    Kept separate from the original plot editor
 ========================================== */
+
+/* ==========================================
+   GADGET PLANNER — MAP EDITION
+========================================== */
 (function () {
     "use strict";
 
@@ -1022,9 +1026,14 @@ function moveToTop() {
         };
 
         var storageKey = "slimeRancherGadgetPlanner";
+        var generalKey = "slimeRancherGeneralTasks";
+
         var selectedArea = "main";
         var selectedSite = null;
+        var placingGadget = false;
         var assignments = {};
+        var completedTasks = {};
+
         var generalTasks = [
             "Unlock all five ranch areas",
             "Unlock all 26 ranch plots",
@@ -1040,105 +1049,210 @@ function moveToTop() {
 
         try {
             assignments = JSON.parse(localStorage.getItem(storageKey)) || {};
-        } catch (error) {
+        } catch (e) {
             assignments = {};
         }
 
-        var generalKey = "slimeRancherGeneralTasks";
-        var completedTasks = {};
-
         try {
             completedTasks = JSON.parse(localStorage.getItem(generalKey)) || {};
-        } catch (error) {
+        } catch (e) {
             completedTasks = {};
-        }
-
-        /* Add planner styling without changing style.css */
-        if (!document.getElementById("gadgetPlannerStyles")) {
-            $("<style>", {
-                id: "gadgetPlannerStyles",
-                text: `
-                    #gadgetPlannerPanel {
-                        padding: 15px;
-                        background: rgba(25, 35, 40, .96);
-                        color: #fff;
-                        border-radius: 10px;
-                        margin: 15px;
-                        max-width: 850px;
-                    }
-                    #gadgetPlannerPanel button,
-                    #gadgetPlannerPanel select,
-                    #gadgetPlannerPanel textarea {
-                        margin: 4px;
-                        padding: 7px;
-                        border-radius: 5px;
-                    }
-                    #gadgetSiteList {
-                        display: grid;
-                        grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
-                        gap: 7px;
-                        margin: 12px 0;
-                    }
-                    .gadgetSiteButton {
-                        background: #344b50;
-                        color: white;
-                        border: 1px solid #789;
-                        cursor: pointer;
-                        min-height: 48px;
-                    }
-                    .gadgetSiteButton.selected {
-                        outline: 2px solid #f4cf68;
-                    }
-                    .gadgetSiteButton.assigned {
-                        background: #34775b;
-                    }
-                    #gadgetPlannerPanel label {
-                        display: block;
-                        margin-top: 10px;
-                    }
-                    #gadgetPlannerPanel textarea {
-                        width: 95%;
-                        min-height: 55px;
-                    }
-                    #gadgetProgress {
-                        background: #26383c;
-                        padding: 10px;
-                        border-radius: 7px;
-                        margin: 12px 0;
-                    }
-                    #gadgetProgressBar {
-                        height: 12px;
-                        background: #53666a;
-                        border-radius: 10px;
-                        overflow: hidden;
-                        margin-top: 7px;
-                    }
-                    #gadgetProgressFill {
-                        height: 100%;
-                        width: 0;
-                        background: #65c58b;
-                    }
-                    #generalCompletion {
-                        margin-top: 20px;
-                        padding-top: 12px;
-                        border-top: 1px solid #789;
-                    }
-                    #generalCompletion label {
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
-                    }
-                    #generalCompletion input {
-                        width: auto;
-                    }
-                `
-            }).appendTo("head");
         }
 
         var panel = $("#gadgetPlannerPanel");
         if (!panel.length) return;
 
-        /* Create the extra checklist and progress display */
+        /* ---------- STYLING ---------- */
+
+        if (!document.getElementById("gadgetPlannerStyles")) {
+            $("<style>", {
+                id: "gadgetPlannerStyles",
+                text: `
+                    #gadgetPlannerPanel {
+                        box-sizing: border-box;
+                        max-width: 950px;
+                        padding: 20px;
+                        margin: 15px;
+                        color: #f4f6f5;
+                        background: #1d3035;
+                        border: 1px solid #526d70;
+                        border-radius: 14px;
+                        box-shadow: 0 8px 25px rgba(0,0,0,.35);
+                    }
+
+                    #gadgetPlannerPanel h2,
+                    #gadgetPlannerPanel h3 {
+                        color: #f4cf68;
+                        margin-top: 12px;
+                    }
+
+                    #gadgetPlannerPanel button,
+                    #gadgetPlannerPanel select,
+                    #gadgetPlannerPanel textarea {
+                        box-sizing: border-box;
+                        border-radius: 7px;
+                        padding: 9px;
+                        margin: 4px;
+                    }
+
+                    #gadgetPlannerPanel select,
+                    #gadgetPlannerPanel textarea {
+                        background: #f4f6f5;
+                        color: #17272b;
+                        max-width: 100%;
+                    }
+
+                    #gadgetZone {
+                        min-width: 180px;
+                    }
+
+                    #gadgetSiteList {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+                        gap: 8px;
+                        margin: 15px 0;
+                    }
+
+                    .gadgetSiteButton {
+                        background: #344d52;
+                        color: white;
+                        border: 1px solid #718b8d;
+                        cursor: pointer;
+                        min-height: 58px;
+                        transition: .15s;
+                    }
+
+                    .gadgetSiteButton:hover {
+                        background: #49666b;
+                    }
+
+                    .gadgetSiteButton.selected {
+                        outline: 3px solid #f4cf68;
+                        background: #526b50;
+                    }
+
+                    .gadgetSiteButton.assigned {
+                        border-color: #75c99a;
+                    }
+
+                    #gadgetSelectedTitle {
+                        font-size: 19px;
+                        color: #f4cf68;
+                        margin: 15px 0;
+                    }
+
+                    #gadgetNotes {
+                        display: block;
+                        width: 100%;
+                        min-height: 65px;
+                    }
+
+                    #gadgetStatus {
+                        min-height: 22px;
+                        color: #f4cf68;
+                        margin: 10px 4px;
+                    }
+
+                    #gadgetProgress {
+                        background: #293f43;
+                        padding: 13px;
+                        border-radius: 9px;
+                        margin: 15px 0;
+                    }
+
+                    #gadgetProgressBar {
+                        height: 13px;
+                        background: #52666a;
+                        border-radius: 10px;
+                        overflow: hidden;
+                        margin-top: 8px;
+                    }
+
+                    #gadgetProgressFill {
+                        height: 100%;
+                        width: 0;
+                        background: #65c58b;
+                        transition: width .2s;
+                    }
+
+                    #generalCompletion {
+                        border-top: 1px solid #526d70;
+                        margin-top: 20px;
+                        padding-top: 12px;
+                    }
+
+                    #generalCompletion label {
+                        display: flex;
+                        align-items: center;
+                        gap: 9px;
+                        margin: 9px 0;
+                    }
+
+                    #generalCompletion input {
+                        width: auto;
+                    }
+
+                    #gadgetMarkers {
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        width: 100%;
+                        height: 100%;
+                        pointer-events: none;
+                        z-index: 4;
+                    }
+
+                    .gadgetMapMarker {
+                        position: absolute;
+                        transform: translate(-50%, -50%);
+                        pointer-events: auto;
+                        cursor: pointer;
+                        color: white;
+                        background: #263f48;
+                        border: 2px solid #f4cf68;
+                        border-radius: 8px;
+                        padding: 5px 8px;
+                        font-size: 12px;
+                        font-weight: bold;
+                        white-space: nowrap;
+                        box-shadow: 0 2px 6px rgba(0,0,0,.5);
+                    }
+
+                    .gadgetMapMarker:hover {
+                        background: #52765f;
+                        z-index: 10;
+                    }
+
+                    body.placingGadget {
+                        cursor: crosshair !important;
+                    }
+
+                    @media (max-width: 700px) {
+                        #gadgetPlannerPanel {
+                            margin: 5px;
+                            padding: 12px;
+                        }
+                    }
+                `
+            }).appendTo("head");
+        }
+
+        /* ---------- STORAGE ---------- */
+
+        function siteKey(area, number) {
+            return area + "-" + number;
+        }
+
+        function saveAssignments() {
+            localStorage.setItem(storageKey, JSON.stringify(assignments));
+        }
+
+        function saveTasks() {
+            localStorage.setItem(generalKey, JSON.stringify(completedTasks));
+        }
+
+        /* ---------- PROGRESS ---------- */
+
         if (!$("#gadgetProgress").length) {
             $("#gadgetStatus").after(`
                 <div id="gadgetProgress">
@@ -1156,27 +1270,16 @@ function moveToTop() {
             `);
         }
 
-        function siteKey(area, number) {
-            return area + "-" + number;
-        }
-
-        function saveAssignments() {
-            localStorage.setItem(storageKey, JSON.stringify(assignments));
-        }
-
-        function saveTasks() {
-            localStorage.setItem(generalKey, JSON.stringify(completedTasks));
-        }
+        /* ---------- SITE LIST ---------- */
 
         function renderSites() {
             var list = $("#gadgetSiteList");
             list.empty();
 
-            var count = areas[selectedArea].count;
-
-            for (var i = 1; i <= count; i++) {
+            for (var i = 1; i <= areas[selectedArea].count; i++) {
                 var key = siteKey(selectedArea, i);
                 var assignment = assignments[key];
+
                 var button = $("<button>", {
                     type: "button",
                     class: "gadgetSiteButton",
@@ -1187,9 +1290,7 @@ function moveToTop() {
 
                 if (assignment && assignment.gadget) {
                     button.addClass("assigned");
-                    button.append(
-                        $("<div>").text(assignment.gadget)
-                    );
+                    button.append($("<div>").text(assignment.gadget));
                 } else {
                     button.append($("<div>").text("Empty"));
                 }
@@ -1204,6 +1305,8 @@ function moveToTop() {
             updateProgress();
         }
 
+        /* ---------- GENERAL CHECKLIST ---------- */
+
         function renderTasks() {
             var list = $("#generalTaskList");
             list.empty();
@@ -1215,13 +1318,15 @@ function moveToTop() {
                     "data-task": index
                 });
 
-                var label = $("<label>").append(checkbox).append(
-                    $("<span>").text(task)
+                list.append(
+                    $("<label>")
+                        .append(checkbox)
+                        .append($("<span>").text(task))
                 );
-
-                list.append(label);
             });
         }
+
+        /* ---------- PROGRESS COUNTER ---------- */
 
         function updateProgress() {
             var total = 0;
@@ -1232,11 +1337,14 @@ function moveToTop() {
 
                 for (var i = 1; i <= areas[area].count; i++) {
                     var entry = assignments[siteKey(area, i)];
-                    if (entry && entry.gadget) assigned++;
+
+                    if (entry && entry.gadget) {
+                        assigned++;
+                    }
                 }
             });
 
-            var percentage = total ? (assigned / total) * 100 : 0;
+            var percentage = total ? assigned / total * 100 : 0;
 
             $("#gadgetProgressText").text(
                 assigned + " / " + total + " sites assigned (" +
@@ -1245,6 +1353,68 @@ function moveToTop() {
 
             $("#gadgetProgressFill").css("width", percentage + "%");
         }
+
+        /* ---------- MAP MARKERS ---------- */
+
+        if (!$("#gadgetMarkers").length) {
+            $("<div>", { id: "gadgetMarkers" }).appendTo("body");
+        }
+
+        function renderGadgetMarkers() {
+            var container = $("#gadgetMarkers");
+            container.empty();
+
+            Object.keys(assignments).forEach(function (key) {
+                var item = assignments[key];
+
+                if (!item || !item.gadget ||
+                    typeof item.x !== "number" ||
+                    typeof item.y !== "number") {
+                    return;
+                }
+
+                var label = item.gadget;
+
+                if (item.value && item.value.indexOf("gordo") !== -1) {
+                    label = "Gordo: " + item.gadget.replace("Gordo Snare - ", "");
+                }
+
+                var marker = $("<button>", {
+                    type: "button",
+                    class: "gadgetMapMarker",
+                    text: label,
+                    title: key
+                });
+
+                marker.css({
+                    left: (leftOffset + item.x) + "px",
+                    top: (topOffset + item.y) + "px"
+                });
+
+                marker.attr("data-key", key);
+                container.append(marker);
+            });
+        }
+
+        $("#gadgetMarkers").on("click", ".gadgetMapMarker", function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            var key = $(this).attr("data-key");
+            var parts = key.split("-");
+            var area = parts.shift();
+            var number = parseInt(parts.join("-"), 10);
+
+            if (!areas[area] || !number) return;
+
+            selectedArea = area;
+            $("#gadgetZone").val(area);
+            renderSites();
+            openSite(number);
+            $("#gadgetStatus").text("Selected map marker. You can edit its assignment.");
+        });
+
+        /* ---------- EDITOR ---------- */
 
         function clearEditor() {
             selectedSite = null;
@@ -1265,10 +1435,13 @@ function moveToTop() {
                 areas[selectedArea].name + " — Site " + number
             );
 
-            $("#gadgetChoice").val(assignment.gadget || "");
+            $("#gadgetChoice").val(assignment.value || "");
             $("#gadgetNotes").val(assignment.notes || "");
+
             $("#gadgetStatus").text(
-                assignment.gadget ? "Currently assigned: " + assignment.gadget : "This site is empty."
+                assignment.gadget
+                    ? "Currently assigned: " + assignment.gadget
+                    : "This site is empty."
             );
 
             renderSites();
@@ -1277,7 +1450,9 @@ function moveToTop() {
         $("#gadgetZone").on("change", function () {
             selectedArea = $(this).val();
 
-            if (!areas[selectedArea]) selectedArea = "main";
+            if (!areas[selectedArea]) {
+                selectedArea = "main";
+            }
 
             clearEditor();
         });
@@ -1285,6 +1460,8 @@ function moveToTop() {
         $("#gadgetSiteList").on("click", ".gadgetSiteButton", function () {
             openSite(parseInt($(this).attr("data-site"), 10));
         });
+
+        /* ---------- SAVE ASSIGNMENT ---------- */
 
         $("#saveGadget").on("click", function () {
             if (selectedSite === null) {
@@ -1294,23 +1471,90 @@ function moveToTop() {
 
             var gadget = $("#gadgetChoice").val();
             var notes = $("#gadgetNotes").val();
-
             var key = siteKey(selectedArea, selectedSite);
 
             if (!gadget) {
                 delete assignments[key];
             } else {
+                var previous = assignments[key] || {};
+
                 assignments[key] = {
                     gadget: $("#gadgetChoice option:selected").text(),
                     value: gadget,
-                    notes: notes
+                    notes: notes,
+                    x: previous.x,
+                    y: previous.y
                 };
             }
 
             saveAssignments();
-            $("#gadgetStatus").text("Site saved.");
             renderSites();
+            renderGadgetMarkers();
+
+            $("#gadgetStatus").text(
+                gadget ? "Assignment saved." : "Assignment cleared."
+            );
         });
+
+        /* ---------- PLACE ON MAP ---------- */
+
+        $("#placeGadget").on("click", function () {
+            if (selectedSite === null) {
+                $("#gadgetStatus").text("Select a site first.");
+                return;
+            }
+
+            var key = siteKey(selectedArea, selectedSite);
+            var assignment = assignments[key];
+
+            if (!assignment || !assignment.gadget) {
+                $("#gadgetStatus").text("Save a gadget assignment first.");
+                return;
+            }
+
+            placingGadget = true;
+            $("body").addClass("placingGadget");
+
+            $("#gadgetStatus").text(
+                "Placement mode: click the desired position on the ranch map."
+            );
+        });
+
+        $("body").on("click.gadgetPlacement", function (event) {
+            if (!placingGadget) return;
+
+            if ($(event.target).closest(
+                "#gadgetPlannerPanel, #toggleGadgetPlanner, #gadgetMarkers"
+            ).length) {
+                return;
+            }
+
+            var key = siteKey(selectedArea, selectedSite);
+            var assignment = assignments[key];
+
+            if (!assignment) return;
+
+            var x = event.pageX - leftOffset;
+            var y = event.pageY - topOffset;
+
+            if (x < 0 || y < 0 || x > desiredWidth || y > desiredHeight) {
+                $("#gadgetStatus").text("Click inside the ranch map.");
+                return;
+            }
+
+            assignment.x = x;
+            assignment.y = y;
+
+            saveAssignments();
+            renderGadgetMarkers();
+
+            placingGadget = false;
+            $("body").removeClass("placingGadget");
+
+            $("#gadgetStatus").text("Gadget placed on the map!");
+        });
+
+        /* ---------- CLEAR ASSIGNMENT ---------- */
 
         $("#clearGadget").on("click", function () {
             if (selectedSite === null) {
@@ -1319,10 +1563,15 @@ function moveToTop() {
             }
 
             delete assignments[siteKey(selectedArea, selectedSite)];
+
             saveAssignments();
             clearEditor();
+            renderGadgetMarkers();
+
             $("#gadgetStatus").text("Site cleared.");
         });
+
+        /* ---------- GENERAL CHECKLIST ---------- */
 
         $("#generalTaskList").on("change", "input", function () {
             var index = $(this).attr("data-task");
@@ -1330,15 +1579,24 @@ function moveToTop() {
             saveTasks();
         });
 
-        /* Initial display */
+        /* ---------- TOGGLE PANEL ---------- */
+
+        $("#toggleGadgetPlanner").off("click.gadgetPlanner").on(
+            "click.gadgetPlanner",
+            function () {
+                panel.toggle();
+            }
+        );
+
+        /* ---------- INITIAL DISPLAY ---------- */
+
         renderSites();
-		console.log("Gadget Planner loaded");
         renderTasks();
         updateProgress();
+        renderGadgetMarkers();
 
-        $("#toggleGadgetPlanner").on("click", function () {
-            $("#gadgetPlannerPanel").toggle();
-        });
     });
+})();
+
 })();
 
