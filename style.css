@@ -389,13 +389,13 @@ label {
 
 #gadgetSiteList {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
     gap: 8px;
 }
 
 #gadgetSiteList button {
-    padding: 9px 6px;
-    min-height: 76px;
+    padding: 7px 5px;
+    min-height: 65px;
     border-radius: 7px;
     cursor: pointer;
     transition: background 0.15s ease, border-color 0.15s ease;
