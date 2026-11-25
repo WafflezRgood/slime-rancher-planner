@@ -432,24 +432,65 @@ function importDataFromText() {
 /**
  * Import data by uploading exported file
  */
+
 function importDataFromFile() {
-	$('#fileLoadingAnimation').css('display', 'block');
-	var file = this.files[0];
-	var textType = /text.*/;
+    var file = this.files[0];
 
-	if (file.type.match(textType)) {
-		var reader = new FileReader();
+    if (!file) return;
 
-		reader.onload = function () {
-			// noinspection JSCheckFunctionSignatures
-			plots = JSON.parse(reader.result);
-		};
+    $('#fileLoadingAnimation').show();
 
-		reader.readAsText(file);
-	} else {
-		$('#fileError').css('display', 'block');
-		return;
-	}
+    var reader = new FileReader();
+
+    reader.onload = function () {
+        try {
+            var data = JSON.parse(reader.result);
+
+            if (Array.isArray(data)) {
+                // Older plot-only save
+                plots = data;
+            } else if (data && Array.isArray(data.plots)) {
+                // New combined save
+                plots = data.plots;
+
+                if (data.gadgetAssignments !== undefined) {
+                    localStorage.setItem(
+                        'slimeRancherGadgetPlanner',
+                        JSON.stringify(data.gadgetAssignments)
+                    );
+                }
+
+                if (data.generalTasks !== undefined) {
+                    localStorage.setItem(
+                        'slimeRancherGeneralTasks',
+                        JSON.stringify(data.generalTasks)
+                    );
+                }
+            } else {
+                throw new Error('Invalid save file');
+            }
+
+            savePlotsToStorage();
+
+            $('#fileLoadingAnimation').hide();
+            $('#importData').modal('hide');
+
+            reloadSite();
+
+        } catch (error) {
+            $('#fileError').show();
+            $('#fileLoadingAnimation').hide();
+            console.error('Import failed:', error);
+        }
+    };
+
+    reader.onerror = function () {
+        $('#fileError').show();
+        $('#fileLoadingAnimation').hide();
+    };
+
+    reader.readAsText(file);
+}
 
 	setTimeout(function(){
 		$('#importData').modal('hide');
