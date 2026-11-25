@@ -389,21 +389,14 @@ label {
 
 #gadgetSiteList {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
     gap: 8px;
 }
 
 #gadgetSiteList button {
-    padding: 10px;
-    border-radius: 6px;
+    padding: 9px 6px;
+    min-height: 76px;
+    border-radius: 7px;
     cursor: pointer;
     transition: background 0.15s ease, border-color 0.15s ease;
-}
-
-#gadgetSiteList button:hover {
-    filter: brightness(1.2);
-}
-
-#gadgetPlannerPanel button {
-    cursor: pointer;
 }
