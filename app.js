@@ -309,12 +309,29 @@ $(document).ready(function () {
  * Save plot array to file
  */
 function saveData(e) {
-	e.preventDefault();
-	$('#downloadData').modal('show');
+    e.preventDefault();
 
-	var downloadLink = $('#downloadButton');
-	downloadLink.attr('download', 'export.txt');
-	downloadLink.attr('href', 'data:text/plain;base64,' + btoa(JSON.stringify(plots)));
+    var exportData = {
+        format: "slime-rancher-planner",
+        version: 2,
+        plots: plots,
+        gadgetAssignments: JSON.parse(
+            localStorage.getItem("slimeRancherGadgetPlanner") || "{}"
+        ),
+        generalTasks: JSON.parse(
+            localStorage.getItem("slimeRancherGeneralTasks") || "{}"
+        )
+    };
+
+    $('#downloadData').modal('show');
+
+    var downloadLink = $('#downloadButton');
+    downloadLink.attr('download', 'slime-rancher-plan.json');
+    downloadLink.attr(
+        'href',
+        'data:text/plain;charset=utf-8,' +
+        encodeURIComponent(JSON.stringify(exportData))
+    );
 }
 
 /**
