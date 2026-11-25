@@ -1042,6 +1042,7 @@ function savePlot() {
 			}
 		}
 	});
+	savePlotsToStorage();
 	reloadSite();
 	$('#setupPlot').modal('hide');
 }
