@@ -361,8 +361,10 @@ label {
 	height: 30px;
 }
 #gadgetPlannerPanel {
-    max-height: 80vh;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    box-sizing: border-box;
+    position: relative;
+    z-index: 1001;
+}
+
+#gadgetMarkers {
+    z-index: 1000;
 }
