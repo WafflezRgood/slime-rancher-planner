@@ -492,11 +492,7 @@ function importDataFromFile() {
     reader.readAsText(file);
 }
 
-	setTimeout(function(){
-		$('#importData').modal('hide');
-		reloadSite();
-	}, 1000);
-}
+	
 
 /**
  * Reset data to factory value
