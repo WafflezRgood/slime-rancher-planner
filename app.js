@@ -497,12 +497,13 @@ function importDataFromFile() {
 /**
  * Reset data to factory value
  */
+
 function resetData(e) {
     e.preventDefault();
 
-    // Reset original ranch planner
+    // Reset plots to factory defaults
     plots = $.extend(true, [], defaultValuesPlots);
-    reloadSite();
+    savePlotsToStorage();
 
     // Reset gadget planner and general checklist
     localStorage.removeItem('slimeRancherGadgetPlanner');
@@ -510,9 +511,10 @@ function resetData(e) {
 
     $('#confirmReset').modal('hide');
 
-    // Reload so all gadget markers and checklists reset visually
+    // Reload with all default data
     location.reload();
 }
+
 
 /**
  * Show or hide number of item text on plots
