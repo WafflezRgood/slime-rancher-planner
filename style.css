@@ -360,3 +360,9 @@ label {
 .slimeCountImage {
 	height: 30px;
 }
+#gadgetPlannerPanel {
+    max-height: 80vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    box-sizing: border-box;
+}
