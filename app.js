@@ -1332,6 +1332,7 @@ function moveToTop() {
 
         /* Initial display */
         renderSites();
+		console.log("Gadget Planner loaded");
         renderTasks();
         updateProgress();
 
