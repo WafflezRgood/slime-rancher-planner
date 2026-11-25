@@ -49,8 +49,7 @@ function createLocation(type, number) {
   button.style.background = saved ? "#8fbd78" : "#304638";
   button.style.color = saved ? "#17221d" : "#f1f3e9";
 
-  button.textContent =
-    `${type} ${number}` + (saved ? `\n${saved}` : "");
+button.textContent = saved || `${type} ${number}`;
 
   button.addEventListener("click", () => {
     selectLocation(type, number);
