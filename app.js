@@ -420,7 +420,7 @@ function importDataFromText() {
 
         savePlotsToStorage();
         $('#importData').modal('hide');
-        reloadSite();
+        location.reload();
 
     } catch (error) {
         $('#fileError').show();
@@ -475,7 +475,7 @@ function importDataFromFile() {
             $('#fileLoadingAnimation').hide();
             $('#importData').modal('hide');
 
-            reloadSite();
+           location.reload();
 
         } catch (error) {
             $('#fileError').show();
